@@ -1,0 +1,14 @@
+{
+  "name": "forms",
+  "version": "1.0.0",
+  "description": "component to capture, validate, and send data",
+  "main": "Forms.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cesar Edwuards Perez Robles",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
+}
