@@ -7,35 +7,38 @@ function Form(id){
   const INPUTS = {
     name: {},
     type: {},
-    add: function(input){
+    add: (input)=>{
       let exist = undefined ;
       if(input.name && typeof input.name === 'string' && input.name !== '' ){
-        exist = this.name[input.name]
+        exist = INPUTS.name[input.name]
         if(exist && input.type !== 'radio'){ throw new Error('The name attribute associated to this input already exist.') }
         else if(exist && input.type === 'radio'){ exist.push(input) }
-        else if(!exist && input.type === 'radio'){ this.name[input.name] = [input] }
-        else if(!exist){ this.name[input.name] = input }
+        else if(!exist && input.type === 'radio'){ INPUTS.name[input.name] = [input] }
+        else if(!exist){ INPUTS.name[input.name] = input }
       }
       else{ throw new Error('The input is must have a name attribute') }
 
       if(input.tagName === 'INPUT' && typeof input.type === 'string' ){
-        exist = this.type[input.type]
+        exist = INPUTS.type[input.type]
         if(exist){ exist.push(input) }
-        else{ this.type[input.type] = [input] }
+        else{ INPUTS.type[input.type] = [input] }
       }
+
+      input.rules = []
+
     },
-    collect: function(where){
+    collect: (where)=>{
       let result = []
       if(where && typeof where === 'object'){
         if(where.type && typeof where.type === 'string'){
-          this.type[where.type].forEach((input)=>{result.push(input)})
+          INPUTS.type[where.type].forEach((input)=>{result.push(input)})
         }
         else if (where.name && typeof where.name === 'string'){
-          if(this.name[where.name].type === 'radio'){
-            result.push(this.name[where.name].filter((input)=>{ return input.attributes['checked'] }))
+          if(INPUTS.name[where.name].type === 'radio'){
+            result.push(INPUTS.name[where.name].filter((input)=>{ return input.attributes['checked'] }))
           }
           else{
-            result.push(this.name[where.name])
+            result.push(INPUTS.name[where.name])
           }
         }
         else{
@@ -43,12 +46,12 @@ function Form(id){
         }
       }
       else{
-        for(let input in this.name){
-          if(this.name[input].type === 'radio'){
-            result.push(this.name[input].filter((input)=>{ return input.attributes['checked'] }))
+        for(let input in INPUTS.name){
+          if(INPUTS.name[input].type === 'radio'){
+            result.push(INPUTS.name[input].filter((input)=>{ return input.attributes['checked'] }))
           }
           else{
-            result.push(this.name[input])
+            result.push(INPUTS.name[input])
           }
         }
       }
@@ -60,7 +63,6 @@ function Form(id){
   const BUTTONS = []
   const ERROR = {view: undefined, list:[], response:{error: false, message: ''} }
   const RULES = {
-    check:[],
     available: {
       'text:notEmpty': function(input){
         if(input.value === undefined || input.value === '' || input.value === null){
@@ -90,18 +92,55 @@ function Form(id){
         return this
       },
     },
+    add: (rule)=>{
+      if(rule && typeof rule === 'object' && typeof rule.name === 'string' && typeof rule.test === 'function'){
+        let response = rule.test()
+        if(typeof response.error === 'boolean' && typeof response.message === 'string'){
+          RULES.available[rule.name] = rule.test
+        }
+        else{
+          throw new Error('The test function must return a response with the following structure --> {error: true, message: string }');
+        }
+
+      }
+      else{
+        throw new Error('The paramter must adhere to the following structure --> {name: string, test: function }')
+      }
+    },
+    register: (register)=>{
+      if(typeof register === 'object' && (typeof register.input === 'object' || Array.isArray(register) ) && Array.isArray(register.rules) ){
+        let inputs = [], missing = undefined
+        if(register.rules.some((name)=>{ missing = RULES.available[name] === undefined; if(missing){ missing = name } return missing  })){
+          throw new Error('The following rule could not be found --> '+missing)
+        }
+
+        if(Array.isArray(register.input)){
+           register.input.forEach((query,i,array)=>{
+             query = INPUT.collect(query)
+             if(query.length){ query.forEach((input)=>{ inputs.push(input) }) }
+             else{ throw new Error('The query at the following index '+i+'was empty')}
+           })
+        }
+        else{
+          inputs = INPUTS.collect(register.input)
+          if(inputs.length === 0){ throw new Error('The input query you provided was empty') }
+        }
+
+        inputs.forEach((input)=>{
+          register.rules.forEach((rule)=>{ if(input.rules.indexOf(rule) === -1){ input.rules.push(rule) } })
+        })
+
+      }
+      else{
+        throw new Error('The paramter must adhere to the following structure --> {input: [] || {type: string} || {name: string} , rules: [function,function,...] }')
+      }
+    },
     validate: ()=>{
       ERROR.list = []
-      RULES.check.forEach((validate)=>{
-        validate.inputs.forEach((input)=>{
-          validate.rules.forEach((rule)=>{
-            ERROR.response.error = false, ERROR.response.message = '';
-            rule = RULES.available[rule].call(ERROR.response,input)
-            if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }
-          })
-        })
+      this.collect().forEach((input)=>{
+        if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule](input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }  }) }
       })
-      return ERROR.list;
+      return {list: ERROR.list,view: ERROR.view}
     }
   }
   const SEND = function(send){
@@ -128,7 +167,7 @@ function Form(id){
     unless = [
       {
         condition: (node)=>{ return ['INPUT','SELECT','TEXTAREA'].indexOf(node.tagName) !== -1 },
-        execute: (node)=>{ this.add(node) }
+        execute: (node)=>{ INPUTS.add(node) }
       },
       {
         condition: (node)=>{ return node.tagName === 'BUTTON' },
@@ -149,71 +188,14 @@ function Form(id){
     }
   }
 
-  const COLLECT = (where)=>{
-    let unless = [], collect = undefined, push = undefined; copy = []
-    if(where !== undefined && typeof where === 'object'){
-      if(where.type === undefined && where.name === undefined && where.attrs === undefined ){ throw new Error('The where paramter must have one or all properties --> { type: string, name: string , attrs: {key: value}} ')}
-      if(where.type && typeof where.type !== 'string' || where.name && typeof where.name !== 'string' || where.attrs && typeof  where.attrs !== 'object'){
-        throw new Error('The where paramter must adhere to the following structure --> {type: string, name: string, attr: { key: value(string) } }')
-      }
-
-      if(where.type){ unless.push((input)=>{ return input.type === where.type }) }
-      if(where.name){ unless.push((input)=>{ return input.name === where.name }) }
-      if(where.attrs){
-        unless.push((input)=>{
-          let error = false;
-          for(let name in where.attrs){ if(input.attributes[name] === undefined || input.attributes[name].value !== where.attrs[name] ){ error = true; break; } }
-          return !error
-        })
-      }
-    }
-
-    push = (input)=>{
-      if(input.type !== 'radio' || input.type !== 'checkbox'){
-        copy.push(input)
-      }
-      else if (input.attributes['checked']){ copy.push(input) }
-    }
-    collect = (function(){
-      if(unless.length){ return (input)=>{ if( unless.every((test)=>{ return test(input) }) ){ push(input) } } }
-      else { return push }
-    }())
-
-    this.forEach(collect)
-    return copy
+  this.collect = INPUTS.collect
+  this.rules = {
+    register: RULES.register,
+    add: RULES.add
   }
-
-  return {collect: INPUTS.collect}
-
-  // this.collect = INPUTS.collect
-
+  this.validate = RULES.validate
   // this.validate = RULES.validate
-  //
-  // this.rules = {
-  //   register: (register)=>{
-  //     if(typeof register != 'object' || typeof register.name !== 'string' || typeof register.rule !== 'function' ){
-  //       throw new Error('The register paramter must adhere to the following structure ---> {name: string, rule: function }');
-  //     }
-  //     let test = register.rule.call(ERROR.response,{value: false});
-  //     if(typeof test !== 'object'  || typeof test.error !== 'boolean' || typeof test.message !== 'string' ){
-  //       throw new Error('The rule function must return a response object --> { error: boolean, message: string }');
-  //     }
-  //     RULES.available[register.name] = register.rule
-  //   },
-  //   check: (against)=>{
-  //     if(typeof against !== 'object' || typeof against.input !== 'object' || !Array.isArray(against.rules)){
-  //       throw new Error('The against paramter must adhere to the following structure --> {input: {name: string, type: string, attrs: object }, rules: [string ,string] }')
-  //     }
-  //     against.inputs = COLLECT(against.input); let missing = '';
-  //     against.rules.forEach((rule)=>{ if(RULES.available[rule] === undefined){ missing += (rule+', ') } })
-  //     if(missing.length){ throw new Error('The following rule names do not exist --> '+missing )}
-  //     if(against.inputs.length){
-  //       RULES.check.push({inputs:against.inputs,rules:against.rules})
-  //     }
-  //     else{ throw new Error('The input query you passed did not return any inputs') }
-  //   }
-  // }
-  //
+
   // this.buttons = {
   //   register: function(register,listen = false){
   //     //{button:string, type: string, handler: {'name':function }}
