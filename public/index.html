@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="js/index.js" type="text/javascript"></script>
+  </head>
+  <body>
+  <div class="form-wrapper">
+    <form data-id="signUp" class="col" >
+      <h6>Sing up</h6>
+      <div class="col input-cont">
+        <div class="col">
+          <label for="">First Name</label>
+          <input type="text" name="firstName" value="" placeholder="First name">
+        </div>
+        <div class="col">
+          <label for="">Last Name</label>
+          <input type="text" name="lastName" value="" placeholder="Last name">
+        </div>
+        <div class="col">
+          <label for="">Email</label>
+          <input type="email" name="email" value="" placeholder="example@email.com">
+        </div>
+        <div data="dob" class="row">
+          <div class="col">
+            <label for="">Year</label>
+            <input type="number" data="dob" name="year" value="" placeholder="YYYY" min="1900" max="2019">
+          </div>
+          <div class="col">
+            <label for="">Month</label>
+            <input type="number" data="dob" name="month" value="" placeholder="MM" min="1" max="12">
+          </div>
+          <div class="col">
+            <label for="">Day</label>
+            <input type="number" data="dob" name="day" value="" placeholder="DD" min="1" max="31">
+          </div>
+        </div>
+      </div>
+      <div data-view="error" class="hide"></div>
+      <button type="button" name="send">Send</button>
+    </form>
+  </div>
+  </body>
+</html>

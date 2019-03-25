@@ -1,0 +1,192 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+body, html {
+  font-family: 'Ubuntu';
+  height: 100vh;
+  width: 100%; }
+
+.row, .col {
+  display: flex; }
+
+.col {
+  flex-direction: column; }
+
+.hide {
+  display: none; }
+
+.form-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+
+input:focus, input:active, input:hover, button {
+  outline: none; }
+
+form input, button {
+  border: none;
+  font-family: 'Ubuntu';
+  background-color: white; }
+
+form button {
+  min-width: 75px;
+  min-height: 1.25rem; }
+
+form input {
+  transition: all 1s;
+  padding: 5px; }
+
+input:hover {
+  border-bottom: 1px solid red; }
+
+form[data-id="signUp"] {
+  max-width: 500px;
+  max-height: 500px; }
+  form[data-id="signUp"] h6 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 2em; }
+  form[data-id="signUp"] button, form[data-id="signUp"] [data-view="error"] {
+    width: 100%;
+    height: calc(99.9% * 1/4 - (15px - 15px * 1/4));
+    margin-bottom: 15px; }
+  form[data-id="signUp"] button:last-child, form[data-id="signUp"] [data-view="error"]:last-child {
+    margin-bottom: 0; }
+  form[data-id="signUp"] .input-cont {
+    width: 100%;
+    height: calc(99.9% * 2/4 - (15px - 15px * 2/4));
+    margin-bottom: 15px; }
+  form[data-id="signUp"] .input-cont:last-child {
+    margin-bottom: 0; }
+    form[data-id="signUp"] .input-cont > .col, form[data-id="signUp"] .input-cont [data="dob"] {
+      width: 100%;
+      height: calc(99.9% * 1/4 - (30px - 30px * 1/4));
+      margin-bottom: 30px; }
+    form[data-id="signUp"] .input-cont > .col:last-child, form[data-id="signUp"] .input-cont [data="dob"]:last-child {
+      margin-bottom: 0; }
+      form[data-id="signUp"] .input-cont > .col input, form[data-id="signUp"] .input-cont > .col label, form[data-id="signUp"] .input-cont [data="dob"] input, form[data-id="signUp"] .input-cont [data="dob"] label {
+        width: 100%;
+        height: calc(99.9% * 1/2 - (15px - 15px * 1/2));
+        margin-bottom: 15px; }
+      form[data-id="signUp"] .input-cont > .col input:last-child, form[data-id="signUp"] .input-cont > .col label:last-child, form[data-id="signUp"] .input-cont [data="dob"] input:last-child, form[data-id="signUp"] .input-cont [data="dob"] label:last-child {
+        margin-bottom: 0; }
+      form[data-id="signUp"] .input-cont > .col input, form[data-id="signUp"] .input-cont [data="dob"] input {
+        width: calc(100% - 10px);
+        border-bottom: 1px solid grey; }
+    form[data-id="signUp"] .input-cont [data="dob"] .col {
+      justify-content: flex-end;
+      width: calc(99.9% * 1/3 - (30px - 30px * 1/3)); }
+    form[data-id="signUp"] .input-cont [data="dob"] .col:nth-child(1n) {
+      float: left;
+      margin-right: 30px;
+      clear: none; }
+    form[data-id="signUp"] .input-cont [data="dob"] .col:last-child {
+      margin-right: 0; }
+    form[data-id="signUp"] .input-cont [data="dob"] .col:nth-child(3n) {
+      margin-right: 0;
+      float: right; }
+    form[data-id="signUp"] .input-cont [data="dob"] .col:nth-child(3n + 1) {
+      clear: both; }
+      form[data-id="signUp"] .input-cont [data="dob"] .col input, form[data-id="signUp"] .input-cont [data="dob"] .col label {
+        width: 100%;
+        height: calc(99.9% * 1/2 - (15px - 15px * 1/2));
+        margin-bottom: 15px; }
+      form[data-id="signUp"] .input-cont [data="dob"] .col input:last-child, form[data-id="signUp"] .input-cont [data="dob"] .col label:last-child {
+        margin-bottom: 0; }
+      form[data-id="signUp"] .input-cont [data="dob"] .col input {
+        width: calc(100% - 10px); }
+    form[data-id="signUp"] .input-cont input.error {
+      border-bottom: 1px solid red; }
