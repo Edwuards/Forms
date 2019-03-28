@@ -60,7 +60,51 @@ function Form(id){
 
     }
   }
-  const BUTTONS = []
+  const BUTTONS = {
+    name: {},
+    get:(name)=>{
+      if(name && typeof name === 'string'){
+        if(BUTTONS.name[name]){ return BUTTONS.name[name] }
+        else{ throw new Error('The button under the name '+name+' does not exist inside this form'); }
+      }
+      else{
+        let result = []
+        for(let button in BUTTONS.name){
+          result.push(BUTTONS.name[button])
+        }
+        return result
+      }
+    },
+    add:(node)=>{
+      if(typeof node.name === undefined || typeof node.name !== 'string'){ throw new Error('The button needs a name attribute');}
+      BUTTONS.name[node.name] = node
+      node.register = BUTTONS.register
+      node.listen = BUTTONS.listen
+      node.actions = {}
+    },
+    register: function(action){
+      if(typeof action !== 'object' || typeof action.type !== 'string' || typeof action.handler !== 'object' ){
+        throw new Error('The action paramter must adhere to the following structure --> {type: string, handler: {key: function }}')
+      }
+      let key = Object.keys(action.handler);
+      if(key.length !== 1 || typeof action.handler[key[0]] !== 'function' ){
+        throw new Error('The handler must adhere to the following format --> handler: { string: function() }')
+      }
+      key = key[0]
+      if(this.actions[action.type] === undefined ){ this.actions[action.type] = {} }
+      this.actions[action.type][key] = (e)=>{ e.preventDefault();  action.handler[key].call({button: this, collect:INPUTS.collect,validate:RULES.validate},e) }
+      if(action.listen === undefined || typeof action.listen !== 'boolean'){ action.listen = true }
+      if(action.listen){ this.listen({type:action.type,name:key,active:true}) }
+    },
+    listen: function(action){
+      if(typeof action !== 'object' || ( action.type && typeof action.type !== 'string' ) || (action.name && typeof action.name !== 'string') || (action.active && typeof action.active !== 'boolean')){
+        throw new Error('The paramter must adhere to the following format --> {type: string, name: string, active: boolean}')
+      }
+      if(!this.actions[action.type][action.name]){ throw new Error('The action with the following type '+action.type+' and name '+action.name+' could not be found')}
+      if(action.active){ document.addEventListener(action.type,this.actions[action.type][action.name]) }
+      else if(!action.active){ document.removeEventListener(action.type,this.actions[action.type][action.name]) }
+    }
+  }
   const ERROR = {view: undefined, list:[], response:{error: false, message: ''} }
   const RULES = {
     available: {
@@ -171,7 +215,7 @@ function Form(id){
       },
       {
         condition: (node)=>{ return node.tagName === 'BUTTON' },
-        execute: (node)=>{ BUTTONS.push(node) }
+        execute: (node)=>{ BUTTONS.add(node) }
       },
       {
         condition: (node)=>{ return (node.attributes['data-view'] && node.attributes['data-view'].value === 'error') },
@@ -194,53 +238,8 @@ function Form(id){
     add: RULES.add
   }
   this.validate = RULES.validate
-  // this.validate = RULES.validate
-
-  // this.buttons = {
-  //   register: function(register,listen = false){
-  //     //{button:string, type: string, handler: {'name':function }}
-  //     if(typeof register !== 'object' || typeof register.button !== 'string' || typeof register.type !== 'string'
-  //     || typeof register.handler !== 'object' || Object.keys(register.handler).length > 1 ){
-  //       throw new Error('The register paramter must adhere to the following structure --> {button: string, type: string, handler:{ name:function } }');
-  //     }
-  //
-  //     let button = BUTTONS.find((button)=>{ return button.name === register.button });
-  //     if(button === undefined){ throw new Error(`The button ${register.name} was not found inside your form`)}
-  //     if(button.registeredEvents === undefined ){ button.registeredEvents = {} }
-  //     if(button.registeredEvents[register.type] ===  undefined ){ button.registeredEvents[register.type] = {} }
-  //     let name = Object.keys(register.handler)[0]
-  //     if(typeof button.registeredEvents[register.type][name] === 'function'){
-  //       throw new Error('Could not register event, a duplicate event exist under the same type and name');
-  //     }
-  //     else{
-  //       button.registeredEvents[register.type][name] = register.handler[name]
-  //     }
-  //
-  //     if(listen){
-  //       this.listen({listen: true, button: button.name, type: register.type, name: name});
-  //     }
-  //
-  //   },
-  //   listen: function(action){
-  //     //{listen: boolean, type: string, name: string, button: string}
-  //     if(typeof action !== 'object' || typeof action.listen !== 'boolean' || typeof action.button !== 'string' || typeof action.name !== 'string' || typeof action.type !== 'string'){
-  //       throw new Error('The paramter must adhere to the following structure --> {listen: boolean, type: string, name: string, button: string}')
-  //     }
-  //     action.button = BUTTONS.find((button)=>{ return button.name === action.button });
-  //     if(action.button === undefined){ throw new Error('The button name you are supplying does not exist inside this form')}
-  //     action.name = action.button.registeredEvents[action.type][action.name]
-  //     if(action.name === undefined){ throw new Error('The action name you supplyed could not be found registered to this button') }
-  //     if(action.listen){
-  //       action.button.addEventListener(action.type,action.name.bind({collect:COLLECT,validate:RULES.validate,send: SEND, error: ERROR.view }))
-  //     }
-  //     else{
-  //       action.button.removeEventListener(action.type,action.name)
-  //     }
-  //
-  //   }
-  // }
-  //
-  // this.send = SEND
+  this.buttons = BUTTONS.get
+  
 
 }
 
