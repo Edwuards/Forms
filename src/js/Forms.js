@@ -27,7 +27,7 @@ function Form(id){
       input.rules = []
 
     },
-    collect: (where)=>{
+    get: (where)=>{
       let result = []
       if(where && typeof where === 'object'){
         if(where.type && typeof where.type === 'string'){
@@ -58,6 +58,31 @@ function Form(id){
 
       return result
 
+    },
+    format:{
+      json: ()=>{},
+      formData: ()=>{
+        let data = new FormData();
+        INPUTS.get().forEach((input)=>{
+          if(input.type === 'file'){
+            if(input.attributes['multiple']){ let i = 0;
+              while(i < input.files.legnth){ data.append(input.name,input.files[i],input.files[i].name); i++; }
+            }
+            else{ data.append(input.name,input.files[0],input.files[0].name) }
+          }
+          else{ data.append(input.name,input.value) }
+        })
+
+        return { body: data }
+      }
+    },
+    send: (url,options)=>{
+      if(url === undefined || typeof url !== 'string' || options === undefined || typeof options !== 'object'){
+        throw new Error('The url must be a string and the options paramter an object with valid Request properties, use this link as a reference --> https://developer.mozilla.org/en-US/docs/Web/API/Request/Request')
+      }
+      let valid = ['headers','body','mode','credentials','cache','redirect','referrer','integrity'], request = { method: 'POST' }
+      for(let name in options){ if(valid.indexOf(name) !== -1){ request[name] = options[name]} }
+      return fetch(url,request)
     }
   }
   const BUTTONS = {
@@ -92,7 +117,7 @@ function Form(id){
       }
       key = key[0]
       if(this.actions[action.type] === undefined ){ this.actions[action.type] = {} }
-      this.actions[action.type][key] = (e)=>{ e.preventDefault();  action.handler[key].call({button: this, collect:INPUTS.collect,validate:RULES.validate},e) }
+      this.actions[action.type][key] = (e)=>{ e.preventDefault();  action.handler[key].call({button: this, collect:INPUTS.get,validate:RULES.validate},e) }
       if(action.listen === undefined || typeof action.listen !== 'boolean'){ action.listen = true }
       if(action.listen){ this.listen({type:action.type,name:key,active:true}) }
     },
@@ -166,7 +191,7 @@ function Form(id){
            })
         }
         else{
-          inputs = INPUTS.collect(register.input)
+          inputs = INPUTS.get(register.input)
           if(inputs.length === 0){ throw new Error('The input query you provided was empty') }
         }
 
@@ -181,29 +206,12 @@ function Form(id){
     },
     validate: ()=>{
       ERROR.list = []
-      this.collect().forEach((input)=>{
+      INPUTS.get().forEach((input)=>{
         if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule](input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }  }) }
       })
       return {list: ERROR.list,view: ERROR.view}
     }
   }
-  const SEND = function(send){
-    if( typeof send !== 'object' || typeof send.url !== 'string' || typeof send.data === 'object' || typeof send.data.type !== 'string' || send.data.value === undefined){
-      throw new Error('The requeset paramter must adhere to the following structure --> {url: string, data: {type: string, value: ? } }');
-    }
-    if(send.data.type !== 'json' || send.data.type !== 'FormData'){ throw new Error('The data type must be either JSON or FormData') }
-    if(send.data.type === 'FormData' && send.data.value.constructor.name !== 'FormData'){
-      throw new Error('The data type does not match the data value ');
-    }
-    if(send.data.type === 'json' && typeof send.data.value !== 'string'){
-      throw new Error('The data type does not match the data value ');
-    }
-
-    return fetch(send.url,{body:send.data})
-
-  }
-
-  let copy = []
 
   // find the inputs, buttons and error views inside the form.
   {
@@ -232,14 +240,17 @@ function Form(id){
     }
   }
 
-  this.collect = INPUTS.collect
+  this.inputs = {
+    get: INPUTS.get,
+    format: INPUTS.format
+  }
   this.rules = {
     register: RULES.register,
     add: RULES.add
   }
   this.validate = RULES.validate
   this.buttons = BUTTONS.get
-  
+  this.send = INPUTS.send
 
 }
 
