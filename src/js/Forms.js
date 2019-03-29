@@ -60,7 +60,35 @@ function Form(id){
 
     },
     format:{
-      json: ()=>{},
+      json: ()=>{
+        let data = {}, readFile = new FileReader()
+        INPUTS.get().forEach((input)=>{
+          if(input.type === 'file'){
+            if(!data.files){ data.files = {} }
+            let file = undefined, type = undefined, length = input.files.length
+            readFile.onload = ()=>{
+              type = file.type.split('/')[1];
+              if(!data.files[type]){ data.files[type] = [] }
+              data.files[type].push({name: file.name, size: file.size, data: readFile.result.split('base64,')[1] });
+              read()
+            }
+            let read = ()=>{
+              if(length){
+                file = input.files[length - 1]
+                readFile.readAsDataURL(file)
+                length--
+              }
+            }
+            read()
+
+          }
+          else{
+
+            data[input.name] = input.value
+          }
+        })
+        return { body: data }
+      },
       formData: ()=>{
         let data = new FormData();
         INPUTS.get().forEach((input)=>{
