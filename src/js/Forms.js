@@ -22,20 +22,29 @@ function Form(id){
 
     },
     get: (where)=>{
-      let result = [], key = 'name', input = undefined
+      let result = [], key = 'name', input = undefined, inputs = undefined
       if(where && typeof where === 'object'){
-        key = Object.keys(where), (key.length === 1 ? (key = key[0], (['type','name'].indexOf(key) !== -1 ? key : key = false ) ) : (key = false));
+        key = Object.keys(where), (key.length === 1 ? (key = key[0], (['type','name'].indexOf(key) !== -1 ? inputs = INPUTS[key][where[key]] : key = false ) ) : (key = false));
         if(!key || typeof where[key] !== 'string'){ throw new Error('The where paramter must be one of the following structures --> {type: string} || {name: string}') }
+        inputs.forEach((input)=>{
+          if(input.type === 'radio' || input.type === 'checkbox'){
+            input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
+          }else{
+            result.push(input)
+          }
+        })
       }
-      for(input in INPUTS[key]){
-        input = INPUTS[key][input]
-        if(input.type === 'radio' || input.type === 'checkbox'){
-          input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
-        }
-        else{
-          result.push(input)
+      else{
+        for(let input in INPUTS.name){
+          input = INPUTS.name[input]
+          if(input.type === 'radio' || input.type === 'checkbox'){
+            input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
+          }else{
+            result.push(input)
+          }
         }
       }
+
 
       return result
 
@@ -204,7 +213,7 @@ function Form(id){
         }
 
         inputs.forEach((input)=>{
-          register.rules.forEach((rule)=>{ if(input.rules.indexOf(rule) === -1){ input.rules.push(rule) } })
+          register.rules.forEach((rule)=>{ if(input.rules.indexOf(rule) === -1 ){ input.rules.push(rule) } })
         })
 
       }
@@ -250,13 +259,13 @@ function Form(id){
 
   this.inputs = {
     get: INPUTS.get,
-    format: INPUTS.format
+    format: INPUTS.format,
+    validate: RULES.validate
   }
   this.rules = {
     register: RULES.register,
     add: RULES.add
   }
-  this.validate = RULES.validate
   this.buttons = BUTTONS.get
   this.send = INPUTS.send
 
