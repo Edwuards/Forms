@@ -8,51 +8,32 @@ function Form(id){
     name: {},
     type: {},
     add: (input)=>{
-      let exist = undefined ;
-      if(input.name && typeof input.name === 'string' && input.name !== '' ){
-        exist = INPUTS.name[input.name]
-        if(exist && input.type !== 'radio'){ throw new Error('The name attribute associated to this input already exist.') }
-        else if(exist && input.type === 'radio'){ exist.push(input) }
-        else if(!exist && input.type === 'radio'){ INPUTS.name[input.name] = [input] }
-        else if(!exist){ INPUTS.name[input.name] = input }
-      }
-      else{ throw new Error('The input is must have a name attribute') }
+      if(input.name === '' || input.name === undefined || (input.tageName === 'INPUT' && (input.type === undefined || input.type === '') ) ){ throw new Error('The input is must have a name attribute and a type if the tag is an input') }
+      let exist = INPUTS.name[input.name]
+      if(exist && (input.type !== 'radio' || input.type !== 'checkbox')){ throw new Error('The name attribute associated to this input already exist.') }
+      else if(input.type === 'radio' || input.type === 'checbox'){ exist ? exist.push(input) : INPUTS.name[input.name] = [input] }
+      else{ INPUTS.name[input.name] = input }
 
-      if(input.tagName === 'INPUT' && typeof input.type === 'string' ){
+      if(input.tagName === 'INPUT' ){
         exist = INPUTS.type[input.type]
-        if(exist){ exist.push(input) }
-        else{ INPUTS.type[input.type] = [input] }
+        exist ? exist.push(input) : INPUTS.type[input.type] = [input]
       }
-
       input.rules = []
 
     },
     get: (where)=>{
-      let result = []
+      let result = [], key = 'name', input = undefined
       if(where && typeof where === 'object'){
-        if(where.type && typeof where.type === 'string'){
-          INPUTS.type[where.type].forEach((input)=>{result.push(input)})
-        }
-        else if (where.name && typeof where.name === 'string'){
-          if(INPUTS.name[where.name].type === 'radio'){
-            result.push(INPUTS.name[where.name].filter((input)=>{ return input.attributes['checked'] }))
-          }
-          else{
-            result.push(INPUTS.name[where.name])
-          }
+        key = Object.keys(where), (key.length === 1 ? (key = key[0], (['type','name'].indexOf(key) !== -1 ? key : key = false ) ) : (key = false));
+        if(!key || typeof where[key] !== 'string'){ throw new Error('The where paramter must be one of the following structures --> {type: string} || {name: string}') }
+      }
+      for(input in INPUTS[key]){
+        input = INPUTS[key][input]
+        if(input.type === 'radio' || input.type === 'checkbox'){
+          input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
         }
         else{
-          throw new Error('The where paramter must be an object with either a type or name property --> {type: string} || {name: string}')
-        }
-      }
-      else{
-        for(let input in INPUTS.name){
-          if(INPUTS.name[input].type === 'radio'){
-            result.push(INPUTS.name[input].filter((input)=>{ return input.attributes['checked'] }))
-          }
-          else{
-            result.push(INPUTS.name[input])
-          }
+          result.push(input)
         }
       }
 
@@ -83,7 +64,6 @@ function Form(id){
 
           }
           else{
-
             data[input.name] = input.value
           }
         })
