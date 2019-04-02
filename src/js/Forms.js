@@ -26,13 +26,16 @@ function Form(id){
       if(where && typeof where === 'object'){
         key = Object.keys(where), (key.length === 1 ? (key = key[0], (['type','name'].indexOf(key) !== -1 ? inputs = INPUTS[key][where[key]] : key = false ) ) : (key = false));
         if(!key || typeof where[key] !== 'string'){ throw new Error('The where paramter must be one of the following structures --> {type: string} || {name: string}') }
-        inputs.forEach((input)=>{
-          if(input.type === 'radio' || input.type === 'checkbox'){
-            input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
-          }else{
-            result.push(input)
-          }
-        })
+        if(Array.isArray(inputs)){
+          inputs.forEach((input)=>{
+            if(input.type === 'radio' || input.type === 'checkbox'){
+              input.filter((input)=>{ return input.attributes['checked'] }).forEach((input)=>{ results.push(input) })
+            }else{
+              result.push(input)
+            }
+          })
+        }else{ result.push(inputs) }
+
       }
       else{
         for(let input in INPUTS.name){
@@ -76,16 +79,14 @@ function Form(id){
             data[input.name] = input.value
           }
         })
-        return { body: data }
+        return { body: data, headers:{'Content-Type':'application/json'} }
       },
       formData: ()=>{
         let data = new FormData();
         INPUTS.get().forEach((input)=>{
           if(input.type === 'file'){
-            if(input.attributes['multiple']){ let i = 0;
-              while(i < input.files.legnth){ data.append(input.name,input.files[i],input.files[i].name); i++; }
-            }
-            else{ data.append(input.name,input.files[0],input.files[0].name) }
+            let i = 0;
+            while(i < input.files.legnth){ data.append(input.name,input.files[i],input.files[i].name); i++; }
           }
           else{ data.append(input.name,input.value) }
         })
@@ -202,7 +203,7 @@ function Form(id){
 
         if(Array.isArray(register.input)){
            register.input.forEach((query,i,array)=>{
-             query = INPUT.collect(query)
+             query = INPUTS.get(query)
              if(query.length){ query.forEach((input)=>{ inputs.push(input) }) }
              else{ throw new Error('The query at the following index '+i+'was empty')}
            })
@@ -224,7 +225,7 @@ function Form(id){
     validate: ()=>{
       ERROR.list = []
       INPUTS.get().forEach((input)=>{
-        if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule](input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }  }) }
+        if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule].call(ERROR.response,input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }  }) }
       })
       return {list: ERROR.list,view: ERROR.view}
     }
