@@ -1,10 +1,10 @@
 import { Form } from './Forms.js'
 
-let singup = undefined
 
 document.addEventListener('DOMContentLoaded',function(e){
-  singup = new Form('signUp');
+  let signup = new Form('signUp');
+  signup.rules.add({name:'email'})
 
 })
 
-export { singup }
+export { signup }

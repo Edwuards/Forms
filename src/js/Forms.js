@@ -4,6 +4,7 @@ function Form(id){
   if(form.constructor.name === 'Error'){ throw form }
   else if(form === undefined || form === null){ throw new Error(`The form with the following attriubte was not found --> data-id="${id}"`) }
   else if( form.children.length === 0 ){ throw new Error('The following Form is empty not containing buttons or inputs')}
+  const Self = this
   const INPUTS = {
     name: {},
     type: {},
@@ -135,7 +136,7 @@ function Form(id){
       }
       key = key[0]
       if(this.actions[action.type] === undefined ){ this.actions[action.type] = {} }
-      this.actions[action.type][key] = (e)=>{ e.preventDefault();  action.handler[key].call({button: this, collect:INPUTS.get,validate:RULES.validate},e) }
+      this.actions[action.type][key] = (e)=>{ e.preventDefault();  action.handler[key].call({button: this, inputs: Self.inputs },e) }
       if(action.listen === undefined || typeof action.listen !== 'boolean'){ action.listen = true }
       if(action.listen){ this.listen({type:action.type,name:key,active:true}) }
     },
@@ -261,14 +262,14 @@ function Form(id){
   this.inputs = {
     get: INPUTS.get,
     format: INPUTS.format,
-    validate: RULES.validate
+    validate: RULES.validate,
+    send: INPUTS.send
   }
   this.rules = {
     register: RULES.register,
     add: RULES.add
   }
   this.buttons = BUTTONS.get
-  this.send = INPUTS.send
 
 }
 
