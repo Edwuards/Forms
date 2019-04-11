@@ -152,6 +152,11 @@ function Form(id){
   const ERROR = {view: undefined, list:[], response:{error: false, message: ''} }
   const RULES = {
     available: {
+      'text:email': function(input){
+        var run = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if(!run.test(String(input.value).toLowerCase())){ this.error = true; this.message = `The email you entered is not a valid format`; }
+        return this
+      },
       'text:notEmpty': function(input){
         if(input.value === undefined || input.value === '' || input.value === null){
           this.error = true; this.message = `The input ${input.name} is empty`;
