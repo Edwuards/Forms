@@ -231,7 +231,7 @@ function Form(id){
     validate: ()=>{
       ERROR.list = []
       INPUTS.get().forEach((input)=>{
-        if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule].call(ERROR.response,input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) }  }) }
+        if(input.rules.length){ input.rules.forEach((rule)=>{ rule = RULES.available[rule].call(ERROR.response,input); if(rule.error){ ERROR.list.push({input:input,message:rule.message}) } ERROR.response.error = false; ERROR.response.message = '';  }) }
       })
       return {list: ERROR.list,view: ERROR.view}
     }
