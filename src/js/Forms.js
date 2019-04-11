@@ -145,8 +145,8 @@ function Form(id){
         throw new Error('The paramter must adhere to the following format --> {type: string, name: string, active: boolean}')
       }
       if(!this.actions[action.type][action.name]){ throw new Error('The action with the following type '+action.type+' and name '+action.name+' could not be found')}
-      if(action.active){ document.addEventListener(action.type,this.actions[action.type][action.name]) }
-      else if(!action.active){ document.removeEventListener(action.type,this.actions[action.type][action.name]) }
+      if(action.active){ this.addEventListener(action.type,this.actions[action.type][action.name]) }
+      else if(!action.active){ this.removeEventListener(action.type,this.actions[action.type][action.name]) }
     }
   }
   const ERROR = {view: undefined, list:[], response:{error: false, message: ''} }
