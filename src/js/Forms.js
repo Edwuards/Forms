@@ -99,8 +99,8 @@ function Form(id){
       if(url === undefined || typeof url !== 'string' || options === undefined || typeof options !== 'object'){
         throw new Error('The url must be a string and the options paramter an object with valid Request properties, use this link as a reference --> https://developer.mozilla.org/en-US/docs/Web/API/Request/Request')
       }
-      let valid = ['headers','body','mode','credentials','cache','redirect','referrer','integrity'], request = { method: 'POST' }
-      for(let name in options){ if(valid.indexOf(name) !== -1){ request[name] = options[name]} }
+      let valid = ['headers','body','mode','credentials','cache','redirect','referrer','integrity','method'], request = { method: 'POST' }
+      for(let name in options){ if(valid.indexOf(name) !== -1){ request[name] = options[name] } }
       return fetch(url,request)
     }
   }
